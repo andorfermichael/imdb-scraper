@@ -19,7 +19,7 @@ def do_query(id):
         genres = list()
 
         # Retrieve the movie as object
-        movie = imdb.get_title_by_id('tt000000' + str(id))
+        movie = imdb.get_title_by_id('tt' + '%07d' % id)
 
         # Store the persons categorized by their positions
         for person in movie.credits:
@@ -74,7 +74,7 @@ if __name__ == '__main__':
     reload(sys)
 
     # Set default encoding
-    sys.setdefaultencoding('iso-8859-1')
+    sys.setdefaultencoding('utf-8')
 
     # Define commandline arguments
     parser = argparse.ArgumentParser(description='retrieve films from IMDB', usage='python imdb-scrapper.py 10000 save')
