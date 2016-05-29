@@ -113,7 +113,7 @@ if __name__ == '__main__':
 
     # Process N films of IMDb
     logger.info('Movie retrieval started.')
-    for i in range(20, MAX_ITERATIONS + 1):
+    for i in range(1, MAX_ITERATIONS + 1):
         # Get the movie data
         movie = do_query(i)
 
