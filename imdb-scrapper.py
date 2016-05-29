@@ -10,7 +10,7 @@ def gen_json(movies):
     with open('movies.json', mode='w') as moviesjson:
         json.dump(movies, moviesjson)
 
-# Requests the IMDB data for a given movie id
+# Requests the IMDb data for a given movie id
 def do_query(id):
         # Create lists for fields which can have more than one feature
         actors = list()
@@ -75,7 +75,7 @@ if __name__ == '__main__':
     sys.setdefaultencoding('iso-8859-1')
 
     # Define commandline arguments
-    parser = argparse.ArgumentParser(description='retrieve films from IMDB', usage='python tmdb-scrapper.py 10000 save')
+    parser = argparse.ArgumentParser(description='retrieve films from IMDB', usage='python imdb-scrapper.py 10000 save')
     parser.add_argument('number', type=int, help='number of movies to request')
     parser.add_argument('storing', choices=['save', 'unsave'],
                         help='[save] store movies data after each request,[unsave] store movies data after all requests were executed')
@@ -84,7 +84,7 @@ if __name__ == '__main__':
     argcomplete.autocomplete(parser)
 
     # Set up a specific logger with desired output level
-    LOG_FILENAME = './logs/tmdb-scrapper.log'
+    LOG_FILENAME = './logs/imdb-scrapper.log'
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     logger = logging.getLogger(__name__)
 
@@ -104,7 +104,7 @@ if __name__ == '__main__':
     # Create a dictionary for the movie
     movies = {'movies': []}
 
-    # Process N films of IMDB
+    # Process N films of IMDb
     logger.info('Movie retrieval started.')
     for i in range(1, MAX_ITERATIONS + 1):
         # Get the movie data
