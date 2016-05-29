@@ -1,16 +1,9 @@
 from imdbpie import Imdb
 import json
 
+import argparse
+import argcomplete
 import sys
-
-# Reload does the trick!
-reload(sys)
-sys.setdefaultencoding('iso-8859-1')
-
-MAX_ITERATIONS = 9
-
-# Proxy the requests
-imdb = Imdb(anonymize=True)
 
 # Generates a movie json
 def gen_json(movies):
@@ -19,7 +12,6 @@ def gen_json(movies):
 
 # Requests the IMDB data for a given movie id
 def do_query(id):
-
         # Create lists for fields which can have more than one feature
         actors = list()
         writers = list()
@@ -76,6 +68,24 @@ def clean_json():
 
 # Main
 if __name__ == "__main__":
+    # Reload does the trick!
+    reload(sys)
+    sys.setdefaultencoding('iso-8859-1')
+
+    # Define commandline arguments
+    parser = argparse.ArgumentParser(description='retrieve films from IMDB', usage='python tmdb-scrapper.py 10000 save')
+    parser.add_argument('number', type=int, help='number of movies to request')
+    parser.add_argument('storing', choices=['save', 'unsave'],
+                        help='[save] store movies data after each request,[unsave] store movies data after all requests were executed')
+    args = parser.parse_args()
+
+    argcomplete.autocomplete(parser)
+
+    MAX_ITERATIONS = args.number
+
+    # Proxy the requests
+    imdb = Imdb(anonymize=True)
+
     # Create a clean json file
     with open('movies.json', mode='w') as moviesjson:
         json.dump({'movies': []}, moviesjson)
@@ -91,7 +101,12 @@ if __name__ == "__main__":
         # Append the movie data dictionary to the movies dictionary
         movies["movies"].append(movie)
 
-        # Store the update movies dictionary in the json file
+        # Store the update movies dictionary in the json file (after each request)
+        if args.storing == 'save':
+            gen_json(movies)
+
+    # Store the update movies dictionary in the json file (after all movies were retrieved)
+    if args.storing == 'unsave':
         gen_json(movies)
 
     # Remove the wrapping dictionary
