@@ -48,8 +48,19 @@ def do_query(id):
 
         return movie_data
 
+def clean_json():
+    with open('movies.json') as f:
+        movies = json.load(f)
+
+    movies_temp = movies["movies"]
+
+    with open('movies.json', mode='w') as moviesjson:
+        json.dump(movies_temp, moviesjson)
+
 
 if __name__ == "__main__":
+    clean_json()
+
     with open('movies.json', mode='w') as moviesjson:
         json.dump({'movies': []}, moviesjson)
 
