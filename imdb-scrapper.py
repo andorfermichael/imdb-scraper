@@ -23,21 +23,29 @@ def do_query(id):
             logger.info('Movie with id tt' + '%07d' % id + ' does not exists. Continue with tt' + '%07d' % following_id)
             return False
 
-        # Retrieve the movie as object
-        movie = imdb.get_title_by_id('tt' + '%07d' % id)
+        try:
+            # Retrieve the movie as object
+            movie = imdb.get_title_by_id('tt' + '%07d' % id)
 
-        # Store the persons categorized by their positions
-        for person in movie.credits:
-            if person.token == 'directors':
-                directors.append(person.name)
-            elif person.token == 'writers':
-                writers.append(person.name)
-            else:
-                actors.append(person.name)
+            # Store the persons categorized by their positions
+            for person in movie.credits:
+                if person.token == 'directors':
+                    directors.append(person.name)
+                elif person.token == 'writers':
+                    writers.append(person.name)
+                else:
+                    actors.append(person.name)
 
-        # Store the genres
-        for genre in movie.genres:
-                genres.append(genre)
+            # Store the genres
+            for genre in movie.genres:
+                    genres.append(genre)
+        except TypeError:
+            following_id = id + 1
+            logger.info('Movie with id tt' + '%07d' % id + ' has inconsistent data. Continue with tt' + '%07d' % following_id)
+            return False
+        except:
+            logger.info('An error occured while processing movie with id tt' + '%07d' % id + '. Continue with tt' + '%07d' % following_id)
+            return False
 
         # Store the movie data in a dictionary
         movie_data = {
