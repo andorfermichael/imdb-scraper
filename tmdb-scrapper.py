@@ -19,7 +19,7 @@ def do_query(id):
         genres = list()
 
         # Retrieve the movie as object
-        movie = imdb.get_title_by_id("tt000000" + str(id))
+        movie = imdb.get_title_by_id('tt000000' + str(id))
 
         # Store the persons categorized by their positions
         for person in movie.credits:
@@ -39,7 +39,7 @@ def do_query(id):
           "id": movie.imdb_id,
           "name": str(movie.title),
           "year": movie.year,
-          "runtime": str(movie.runtime) + " min.",
+          "runtime": str(movie.runtime) + ' min.',
           "plot": movie.plot_outline,
           "release_date": movie.release_date,
           "certification": movie.certification,
@@ -59,7 +59,7 @@ def clean_json():
         movies = json.load(f)
 
     # Get the value of the wrapping dictionary
-    movies_temp = movies["movies"]
+    movies_temp = movies['movies']
 
     # Store the unwrapped dictionaries
     with open('movies.json', mode='w') as moviesjson:
@@ -67,9 +67,11 @@ def clean_json():
 
 
 # Main
-if __name__ == "__main__":
+if __name__ == '__main__':
     # Reload does the trick!
     reload(sys)
+
+    # Set default encoding
     sys.setdefaultencoding('iso-8859-1')
 
     # Define commandline arguments
@@ -87,7 +89,7 @@ if __name__ == "__main__":
     logger = logging.getLogger(__name__)
 
     # Only show warnings for request library
-    logging.getLogger("requests").setLevel(logging.WARNING)
+    logging.getLogger('requests').setLevel(logging.WARNING)
 
     MAX_ITERATIONS = args.number
 
@@ -109,12 +111,12 @@ if __name__ == "__main__":
         movie = do_query(i)
 
         # Append the movie data dictionary to the movies dictionary
-        movies["movies"].append(movie)
+        movies['movies'].append(movie)
 
         # Store the update movies dictionary in the json file (after each request)
         if args.storing == 'save':
             gen_json(movies)
-            logger.info('Movie with id ' + movie["id"] + ' stored in "movies.json".')
+            logger.info('Movie with id ' + movie['id'] + ' stored in "movies.json".')
 
     # Store the update movies dictionary in the json file (after all movies were retrieved)
     if args.storing == 'unsave':
