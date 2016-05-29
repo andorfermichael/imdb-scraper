@@ -1,8 +1,8 @@
+import argcomplete
+import argparse
 from imdbpie import Imdb
 import json
-
-import argparse
-import argcomplete
+import logging
 import sys
 
 # Generates a movie json
@@ -17,8 +17,6 @@ def do_query(id):
         writers = list()
         directors = list()
         genres = list()
-
-        print("tt" + "%06d" % (0,) + str(id))
 
         # Retrieve the movie as object
         movie = imdb.get_title_by_id("tt000000" + str(id))
@@ -49,6 +47,8 @@ def do_query(id):
           "genre": genres,
           "actor": actors
         }
+
+        logger.info('Movie with id ' + movie.imdb_id + ' retrieved.')
 
         return movie_data
 
@@ -81,12 +81,21 @@ if __name__ == "__main__":
 
     argcomplete.autocomplete(parser)
 
+    # Set up a specific logger with desired output level
+    LOG_FILENAME = './logs/tmdb-scrapper.log'
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    logger = logging.getLogger(__name__)
+
+    # Only show warnings for request library
+    logging.getLogger("requests").setLevel(logging.WARNING)
+
     MAX_ITERATIONS = args.number
 
     # Proxy the requests
     imdb = Imdb(anonymize=True)
 
     # Create a clean json file
+    logger.info('JSON file "movies.json" created.')
     with open('movies.json', mode='w') as moviesjson:
         json.dump({'movies': []}, moviesjson)
 
@@ -94,7 +103,8 @@ if __name__ == "__main__":
     movies = {'movies': []}
 
     # Process N films of IMDB
-    for i in range(1, MAX_ITERATIONS):
+    logger.info('Movie retrieval started.')
+    for i in range(1, MAX_ITERATIONS + 1):
         # Get the movie data
         movie = do_query(i)
 
@@ -104,10 +114,15 @@ if __name__ == "__main__":
         # Store the update movies dictionary in the json file (after each request)
         if args.storing == 'save':
             gen_json(movies)
+            logger.info('Movie with id ' + movie["id"] + ' stored in "movies.json".')
 
     # Store the update movies dictionary in the json file (after all movies were retrieved)
     if args.storing == 'unsave':
         gen_json(movies)
+        logger.info('All retrieved movies were stored in "movies.json".')
 
     # Remove the wrapping dictionary
     clean_json()
+    logger.info('"movies.json" cleaned up.')
+
+logger.info('Movie retrieval finished.')
