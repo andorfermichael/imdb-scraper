@@ -36,16 +36,18 @@ def do_query(id):
 
         # Store the movie data in a dictionary
         movie_data = {
-          "id": movie.imdb_id,
-          "name": str(movie.title),
-          "year": movie.year,
-          "runtime": str(movie.runtime) + ' min.',
-          "plot": movie.plot_outline,
-          "release_date": movie.release_date,
-          "certification": movie.certification,
-          "director": directors,
-          "genre": genres,
-          "actor": actors
+            "actor": actors,
+            "certification": movie.certification,
+            "director": directors,
+            "genre": genres,
+            "id": movie.imdb_id,
+            "name": str(movie.title),
+            "plot": movie.plot_outline,
+            "poster_url": movie.poster_url,
+            "cover_url": movie.cover_url,
+            "release_date": movie.release_date,
+            "runtime": str(movie.runtime) + ' min.',
+            "year": movie.year
         }
 
         logger.info('Movie with id ' + movie.imdb_id + ' retrieved.')
