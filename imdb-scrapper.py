@@ -18,6 +18,11 @@ def do_query(id):
         directors = list()
         genres = list()
 
+        if imdb.title_exists('tt' + '%07d' % id) == False:
+            following_id = id + 1
+            logger.info('Movie with id tt' + '%07d' % id + ' does not exists. Continue with tt' + '%07d' % following_id)
+            return False
+
         # Retrieve the movie as object
         movie = imdb.get_title_by_id('tt' + '%07d' % id)
 
@@ -108,9 +113,12 @@ if __name__ == '__main__':
 
     # Process N films of IMDb
     logger.info('Movie retrieval started.')
-    for i in range(1, MAX_ITERATIONS + 1):
+    for i in range(20, MAX_ITERATIONS + 1):
         # Get the movie data
         movie = do_query(i)
+
+        if movie == False:
+            continue
 
         # Append the movie data dictionary to the movies dictionary
         movies['movies'].append(movie)
