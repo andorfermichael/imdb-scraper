@@ -16,7 +16,7 @@ pip install imdbpie
 
 
 ## Usage
-Collect and store the first 10,000 movies from the IMDb
+Collect and store the first 10,000 movies from the IMDb:
 ```python
-python tmdb-scrapper.py 10000 save
+python imdb-scrapper.py 10000 save
 ```
