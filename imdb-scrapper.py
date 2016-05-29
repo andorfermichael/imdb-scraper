@@ -101,6 +101,7 @@ if __name__ == '__main__':
     # Set up a specific logger with desired output level
     logging.basicConfig(filename='./logs/imdb-scrapper.log', level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     logger = logging.getLogger(__name__)
+    logging.getLogger().addHandler(logging.StreamHandler())
 
     # Only show warnings for request library
     logging.getLogger('requests').setLevel(logging.WARNING)
