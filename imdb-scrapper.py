@@ -91,8 +91,7 @@ if __name__ == '__main__':
     argcomplete.autocomplete(parser)
 
     # Set up a specific logger with desired output level
-    LOG_FILENAME = './logs/imdb-scrapper.log'
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    logging.basicConfig(filename='./logs/imdb-scrapper.log', level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     logger = logging.getLogger(__name__)
 
     # Only show warnings for request library
