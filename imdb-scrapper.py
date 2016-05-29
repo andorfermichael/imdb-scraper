@@ -94,6 +94,7 @@ if __name__ == '__main__':
     parser.add_argument('number', type=int, help='number of movies to request')
     parser.add_argument('storing', choices=['save', 'unsave'],
                         help='[save] store movies data after each request,[unsave] store movies data after all requests were executed')
+    parser.add_argument('--start', type=int, help='the movie id to start with')
     args = parser.parse_args()
 
     argcomplete.autocomplete(parser)
@@ -105,6 +106,11 @@ if __name__ == '__main__':
 
     # Only show warnings for request library
     logging.getLogger('requests').setLevel(logging.WARNING)
+
+    if args.start != None:
+        START_ID = args.start
+    else:
+        START_ID = 1
 
     MAX_ITERATIONS = args.number
 
@@ -121,7 +127,7 @@ if __name__ == '__main__':
 
     # Process N films of IMDb
     logger.info('Movie retrieval started.')
-    for i in range(1, MAX_ITERATIONS + 1):
+    for i in range(START_ID, START_ID + MAX_ITERATIONS):
         # Get the movie data
         movie = do_query(i)
 
