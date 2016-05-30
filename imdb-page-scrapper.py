@@ -32,8 +32,6 @@ def process_page(url):
 
             image_url = tr.find('td', attrs={'class': 'image'}).find('a').find('img')['src'][:-27] + '._V1_UX182_CR0, 0, 182, 268AL_.jpg'
 
-            print(image_url)
-
             # Parse actors
             actors = list()
             actors_temp = tr.find('td', attrs={'class': 'title'}).find('span', attrs={'class': 'credit'}).find_all('a')
@@ -147,7 +145,6 @@ if __name__ == '__main__':
     # Process N films of IMDb
     logger.info('Movie retrieval started.')
     for i in range(START_ID, MAX_ITERATIONS / 50):
-        print(MAX_ITERATIONS / 50)
         # Calculate pagination
         pagination = START_ID + 1
 
