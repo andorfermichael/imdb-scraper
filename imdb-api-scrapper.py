@@ -95,7 +95,7 @@ if __name__ == '__main__':
     sys.setdefaultencoding('utf-8')
 
     # Define commandline arguments
-    parser = argparse.ArgumentParser(description='retrieve films from IMDB', usage='python imdb-scrapper.py 10000 save')
+    parser = argparse.ArgumentParser(description='retrieve films from IMDB', usage='python imdb-api-scrapper.py 10000 save')
     parser.add_argument('number', type=int, help='number of movies to request')
     parser.add_argument('storing', choices=['save', 'unsave'],
                         help='[save] store movies data after each request,[unsave] store movies data after all requests were executed')
