@@ -146,7 +146,7 @@ if __name__ == '__main__':
     logger.info('Movie retrieval started.')
     for i in range(START_ID, MAX_ITERATIONS / 50):
         # Calculate pagination
-        pagination = i + 1
+        pagination = (i * 50) + 1
 
         # Define url
         url = 'http://www.imdb.com/search/title?sort=num_votes&start=' + str(pagination) + '&title_type=feature'
