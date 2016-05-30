@@ -30,3 +30,8 @@ Collect and store the movies 30,000 to 35,000 from the IMDb and append them to t
 ```python
 python imdb-scrapper.py --start 30000 5000 --overwrite no save
 ```
+
+Collect and store the movies and episodes 1 to 2,000 from the IMDb:
+```python
+python imdb-scrapper.py 2000 --episodes yes save
+```
