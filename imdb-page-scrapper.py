@@ -7,6 +7,7 @@ import urllib2
 import time
 from functools import wraps
 import re
+from datetime import date
 from bs4 import BeautifulSoup
 
 def retry(ExceptionToCheck, tries=4, delay=3, backoff=2, logger=None):
@@ -66,12 +67,12 @@ def process_page(url):
     soup = BeautifulSoup(urlopen_with_retry(), 'html.parser')
 
     # Process all table rows
-    for tr in soup.find_all('tr', attrs={"class": re.compile(r"^(even|odd)$")}):
+    for tr in soup.find_all('tr', attrs={'class': re.compile(r"^(even|odd)$")}):
         try:
             title_container = tr.find('td', attrs={'class': 'title'})
 
             # Parse single movie information
-            id = title_container.find('a')['href']#[8:-1]
+            id = title_container.find('a')['href'][8:-1]
             title = title_container.find('a').contents[0]
             year = title_container.find('span', attrs={'class': 'year_type'}).string[1:-1]
             outline = title_container.find('span', attrs={'class': 'outline'}).string
@@ -121,7 +122,10 @@ def process_page(url):
             if args.storing == 'save':
                 gen_json(movies)
                 logger.info('Movie with id ' + id + ' stored in "movies.json".')
+            else:
+                logger.info('Movie with id ' + id + ' hold in RAM. It will be stored later in "movies.json"')
         except:
+            logger.error('Unexpected error occurred.')
             continue
 
 # Removes the wrapping dictionary of the data in the json file
@@ -160,6 +164,9 @@ if __name__ == '__main__':
     if args.start != None and (args.start < 0 or args.start % 50 != 0):
         parser.error('--start has to be 1, 50 or a multiple of 50 (e.g. 100, 250, 1500)')
 
+    if args.start != None and args.number >= 100000:
+        parser.error('--start can only be set if number is smaller than 100000. IMDB does not serve more than 100000 results for any query. In this case we have to split up the list into decades and do not support -start argument.')
+
     argcomplete.autocomplete(parser)
 
     # Set up a specific logger with desired output level
@@ -176,6 +183,8 @@ if __name__ == '__main__':
         START_ID = 0
 
     MAX_ITERATIONS = args.number
+
+    DECADES = [1950, 1960, 1970, 1980, 1990, 2000, 2010, date.today().year]
 
     if args.overwrite == 'yes':
         # Create a clean json file
@@ -199,20 +208,67 @@ if __name__ == '__main__':
 
     # Process N films of IMDb
     logger.info('Movie retrieval started.')
-    for i in range(0, MAX_ITERATIONS / 50):
-        # Calculate pagination
-        if START_ID == 0:
-            pagination = (i * 50) + 1
-        else:
-            pagination = (i * 50) + (START_ID + 1)
 
-        # Define url
-        url = 'http://www.imdb.com/search/title?sort=num_votes&start=' + str(pagination) + '&title_type=feature'
-        logger.info('Started scrapping of ' + url + '.')
+    if args.number < 100000:
+        for i in range(0, MAX_ITERATIONS / 50):
+            # Calculate pagination
+            if START_ID == 0:
+                pagination = (i * 50) + 1
+            else:
+                pagination = (i * 50) + (START_ID + 1)
 
-        # Process page of 50 movies
-        movie = process_page(url)
-        logger.info('Finished scrapping of ' + url + '.')
+            # Define url
+            url = 'http://www.imdb.com/search/title?sort=num_votes&start=' + str(pagination) + '&title_type=feature'
+            logger.info('Started scrapping of ' + url + '.')
+
+            # Process page of 50 movies
+            process_page(url)
+            logger.info('Finished scrapping of ' + url + '.')
+    else:
+        current_number_of_movies = 0
+
+        # Process each decade
+        for i in range(0, len(DECADES) - 1):
+            # Build url
+            url = 'http://www.imdb.com/search/title?sort=num_votes&start=1&title_type=feature&year=' + str(DECADES[i]) + ',' + str(DECADES[i + 1] - 1)
+
+            # Condition for last pair to prevent "index-out-of-range"
+            if i == len(DECADES) - 2:
+                url = 'http://www.imdb.com/search/title?sort=num_votes&start=1&title_type=feature&year=' + str(DECADES[i]) + ',' + str(DECADES[i + 1])
+
+            # Retrieve html and setup parser
+            @retry(Exception, tries=20, delay=5, backoff=2)
+            def urlopen_with_retry():
+                return urllib2.urlopen(url)
+
+            soup = BeautifulSoup(urlopen_with_retry(), 'html.parser')
+
+            # Get the number of movies of the decade
+            number_of_movies_in_decade = int(soup.find('div', attrs={'id': 'left'}).string[9:-9].replace(',', ''))
+
+            # Scrape each page of the current decade
+            for j in range(0, number_of_movies_in_decade / 50):
+                pagination = (j * 50) + 1
+
+                if j != 0:
+                    # Define url
+                    url = 'http://www.imdb.com/search/title?sort=num_votes&start=' + str(pagination) + '&title_type=feature&year=' + str(DECADES[i]) + ',' + str(DECADES[i + 1])
+                    logger.info('Started scrapping of ' + url + '.')
+
+                    # Process page of 50 movies
+                    process_page(url)
+                    logger.info('Finished scrapping of ' + url + '.')
+
+                    # Increment counter
+                    current_number_of_movies += 50
+
+                    # Stop if desired number of movies was reached (inner loop)
+                    if current_number_of_movies == MAX_ITERATIONS:
+                        break
+
+                # Stop if desired number of movies was reached (outer loop)
+                if current_number_of_movies == MAX_ITERATIONS:
+                    break
 
     # Store the updated movies dictionary in the json file (after all movies were retrieved)
     if args.storing == 'unsave':
