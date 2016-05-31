@@ -6,6 +6,7 @@ import sys
 import urllib2
 import time
 from functools import wraps
+import re
 from bs4 import BeautifulSoup
 
 def retry(ExceptionToCheck, tries=4, delay=3, backoff=2, logger=None):
@@ -64,21 +65,24 @@ def process_page(url):
 
     soup = BeautifulSoup(urlopen_with_retry(), 'html.parser')
 
-    print(soup)
-
     # Process all table rows
-    for tr in soup.find_all('tr'):
+    for tr in soup.find_all('tr', attrs={"class": re.compile(r"^(even|odd)$")}):
         try:
             # Parse single movie information
-            id = tr.find('td', attrs={'class': 'title'}).find('a')['href'][8:-1]
+            id = tr.find('td', attrs={'class': 'title'}).find('a')['href']#[8:-1]
             title = tr.find('td', attrs={'class': 'title'}).find('a').contents[0]
             year = tr.find('td', attrs={'class': 'title'}).find('span', attrs={'class': 'year_type'}).string[1:-1]
             outline = tr.find('td', attrs={'class': 'title'}).find('span', attrs={'class': 'outline'}).string
             director = tr.find('td', attrs={'class': 'title'}).find('span', attrs={'class': 'credit'}).find('a').contents[0]
-            certificate = tr.find('td', attrs={'class': 'title'}).find('span', attrs={'class': 'certificate'}).find('span')['title']
             runtime = tr.find('td', attrs={'class': 'title'}).find('span', attrs={'class': 'runtime'}).string
 
             image_url = tr.find('td', attrs={'class': 'image'}).find('a').find('img')['src'][:-27] + '._V1_UX182_CR0, 0, 182, 268AL_.jpg'
+
+            # Sometimes there is no certificate available
+            try:
+                certificate = tr.find('td', attrs={'class': 'title'}).find('span', attrs={'class': 'certificate'}).find('span')['title']
+            except TypeError:
+                certificate = 'n.a.'
 
             # Parse actors
             actors = list()
