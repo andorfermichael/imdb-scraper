@@ -75,21 +75,26 @@ def process_page(url):
             id = title_container.find('a')['href'][8:-1]
             title = title_container.find('a').contents[0]
             year = title_container.find('span', attrs={'class': 'year_type'}).string[1:-1]
-            outline = title_container.find('span', attrs={'class': 'outline'}).string
             director = title_container.find('span', attrs={'class': 'credit'}).find('a').contents[0]
             runtime = title_container.find('span', attrs={'class': 'runtime'}).string
+
+            # Sometimes there is no outline available
+            try:
+                outline = title_container.find('span', attrs={'class': 'outline'}).string
+            except:
+                outline = 'n.a.'
 
             # Sometimes there is no image available
             try:
                 # Build the poster image url based on the cover image url (poster image is higher width and height values)
                 image_url = tr.find('td', attrs={'class': 'image'}).find('a').find('img')['src'][:-27] + '._V1_UX182_CR0, 0, 182, 268AL_.jpg'
-            except TypeError:
+            except:
                 image_url = 'n.a.'
 
             # Sometimes there is no certificate available
             try:
                 certificate = title_container.find('span', attrs={'class': 'certificate'}).find('span')['title']
-            except TypeError:
+            except:
                 certificate = 'n.a.'
 
             # Parse actors
@@ -129,7 +134,7 @@ def process_page(url):
             else:
                 logger.info('Movie with id ' + id + ' hold in RAM. It will be stored later in "movies.json"')
         except:
-            logger.error('Unexpected error occurred.')
+            logger.error('Unexpected error occurred: '.format(sys.exc_info()[0]))
             continue
 
 # Removes the wrapping dictionary of the data in the json file
