@@ -57,13 +57,14 @@ def gen_json(movies):
 
 # Requests the IMDb data for a given movie id
 def process_page(url):
-
     # Retrieve html and setup parser
     @retry(Exception, tries=20, delay=5, backoff=2)
     def urlopen_with_retry():
         return urllib2.urlopen(url)
 
     soup = BeautifulSoup(urlopen_with_retry(), 'html.parser')
+
+    print(soup)
 
     # Process all table rows
     for tr in soup.find_all('tr'):
@@ -191,9 +192,12 @@ if __name__ == '__main__':
 
     # Process N films of IMDb
     logger.info('Movie retrieval started.')
-    for i in range(START_ID, MAX_ITERATIONS / 50):
+    for i in range(0, MAX_ITERATIONS / 50):
         # Calculate pagination
-        pagination = (i * 50) + 1
+        if START_ID == 0:
+            pagination = (i * 50) + 1
+        else:
+            pagination = (i * 50) + (START_ID + 1)
 
         # Define url
         url = 'http://www.imdb.com/search/title?sort=num_votes&start=' + str(pagination) + '&title_type=feature'
