@@ -79,8 +79,12 @@ def process_page(url):
             director = title_container.find('span', attrs={'class': 'credit'}).find('a').contents[0]
             runtime = title_container.find('span', attrs={'class': 'runtime'}).string
 
-            # Build the poster image url based on the cover image url (poster image is higher width and height values)
-            image_url = tr.find('td', attrs={'class': 'image'}).find('a').find('img')['src'][:-27] + '._V1_UX182_CR0, 0, 182, 268AL_.jpg'
+            # Sometimes there is no image available
+            try:
+                # Build the poster image url based on the cover image url (poster image is higher width and height values)
+                image_url = tr.find('td', attrs={'class': 'image'}).find('a').find('img')['src'][:-27] + '._V1_UX182_CR0, 0, 182, 268AL_.jpg'
+            except TypeError:
+                image_url = 'n.a.'
 
             # Sometimes there is no certificate available
             try:
