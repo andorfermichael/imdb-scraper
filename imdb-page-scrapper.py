@@ -68,32 +68,35 @@ def process_page(url):
     # Process all table rows
     for tr in soup.find_all('tr', attrs={"class": re.compile(r"^(even|odd)$")}):
         try:
-            # Parse single movie information
-            id = tr.find('td', attrs={'class': 'title'}).find('a')['href']#[8:-1]
-            title = tr.find('td', attrs={'class': 'title'}).find('a').contents[0]
-            year = tr.find('td', attrs={'class': 'title'}).find('span', attrs={'class': 'year_type'}).string[1:-1]
-            outline = tr.find('td', attrs={'class': 'title'}).find('span', attrs={'class': 'outline'}).string
-            director = tr.find('td', attrs={'class': 'title'}).find('span', attrs={'class': 'credit'}).find('a').contents[0]
-            runtime = tr.find('td', attrs={'class': 'title'}).find('span', attrs={'class': 'runtime'}).string
+            title_container = tr.find('td', attrs={'class': 'title'})
 
+            # Parse single movie information
+            id = title_container.find('a')['href']#[8:-1]
+            title = title_container.find('a').contents[0]
+            year = title_container.find('span', attrs={'class': 'year_type'}).string[1:-1]
+            outline = title_container.find('span', attrs={'class': 'outline'}).string
+            director = title_container.find('span', attrs={'class': 'credit'}).find('a').contents[0]
+            runtime = title_container.find('span', attrs={'class': 'runtime'}).string
+
+            # Build the poster image url based on the cover image url (poster image is higher width and height values)
             image_url = tr.find('td', attrs={'class': 'image'}).find('a').find('img')['src'][:-27] + '._V1_UX182_CR0, 0, 182, 268AL_.jpg'
 
             # Sometimes there is no certificate available
             try:
-                certificate = tr.find('td', attrs={'class': 'title'}).find('span', attrs={'class': 'certificate'}).find('span')['title']
+                certificate = title_container.find('span', attrs={'class': 'certificate'}).find('span')['title']
             except TypeError:
                 certificate = 'n.a.'
 
             # Parse actors
             actors = list()
-            actors_temp = tr.find('td', attrs={'class': 'title'}).find('span', attrs={'class': 'credit'}).find_all('a')
+            actors_temp = title_container.find('span', attrs={'class': 'credit'}).find_all('a')
             for i, a in enumerate(actors_temp):
                 if i != 0:
                     actors.append(actors_temp[i].contents[0])
 
             # Parse genres
             genres = list()
-            genres_temp = tr.find('td', attrs={'class': 'title'}).find('span', attrs={'class': 'genre'}).find_all('a')
+            genres_temp = title_container.find('span', attrs={'class': 'genre'}).find_all('a')
             for i, a in enumerate(genres_temp):
                 genres.append(genres_temp[i].contents[0])
 
