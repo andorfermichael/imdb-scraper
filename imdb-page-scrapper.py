@@ -57,58 +57,81 @@ def gen_json(movies):
     with open('movies.json', mode='w') as moviesjson:
         json.dump(movies, moviesjson)
 
-# Requests the IMDb data for a given movie id
+# Requests the IMDb data for a given url
 def process_page(url):
-    # Retrieve html and setup parser
-    @retry(Exception, tries=20, delay=5, backoff=2)
-    def urlopen_with_retry():
-        return urllib2.urlopen(url)
+    try:
+        # Retrieve html and setup parser
+        @retry(Exception, tries=20, delay=5, backoff=2)
+        def urlopen_with_retry():
+            return urllib2.urlopen(url)
 
-    soup = BeautifulSoup(urlopen_with_retry(), 'html.parser')
+        soup = BeautifulSoup(urlopen_with_retry(), 'html.parser')
 
-    # Process all table rows
-    for tr in soup.find_all('tr', attrs={'class': re.compile(r"^(even|odd)$")}):
-        try:
+        # Process all table rows
+        for tr in soup.find_all('tr', attrs={'class': re.compile(r"^(even|odd)$")}):
             title_container = tr.find('td', attrs={'class': 'title'})
 
             # Parse single movie information
-            id = title_container.find('a')['href'][8:-1]
-            title = title_container.find('a').contents[0]
-            year = title_container.find('span', attrs={'class': 'year_type'}).string[1:-1]
-            director = title_container.find('span', attrs={'class': 'credit'}).find('a').contents[0]
-            runtime = title_container.find('span', attrs={'class': 'runtime'}).string
+            try:
+                id = title_container.find('a')['href'][8:-1]
+            except:
+                id = 'n.a.'
 
-            # Sometimes there is no outline available
+            try:
+                title = title_container.find('a').contents[0]
+            except:
+                title = 'n.a.'
+
+            try:
+                year = title_container.find('span', attrs={'class': 'year_type'}).string[1:-1]
+            except:
+                year = 'n.a.'
+
+            try:
+                director = title_container.find('span', attrs={'class': 'credit'}).find('a').contents[0]
+            except:
+                director = 'n.a.'
+
+            try:
+                runtime = title_container.find('span', attrs={'class': 'runtime'}).string
+            except:
+                runtime = 'n.a.'
+
             try:
                 outline = title_container.find('span', attrs={'class': 'outline'}).string
             except:
                 outline = 'n.a.'
 
-            # Sometimes there is no image available
             try:
                 # Build the poster image url based on the cover image url (poster image is higher width and height values)
-                image_url = tr.find('td', attrs={'class': 'image'}).find('a').find('img')['src'][:-27] + '._V1_UX182_CR0, 0, 182, 268AL_.jpg'
+                image_url = tr.find('td', attrs={'class': 'image'}).find('a').find('img')['src'][
+                            :-27] + '._V1_UX182_CR0, 0, 182, 268AL_.jpg'
             except:
                 image_url = 'n.a.'
 
-            # Sometimes there is no certificate available
             try:
                 certificate = title_container.find('span', attrs={'class': 'certificate'}).find('span')['title']
             except:
                 certificate = 'n.a.'
 
             # Parse actors
-            actors = list()
-            actors_temp = title_container.find('span', attrs={'class': 'credit'}).find_all('a')
-            for i, a in enumerate(actors_temp):
-                if i != 0:
-                    actors.append(actors_temp[i].contents[0])
+            try:
+                actors = list()
+                actors_temp = title_container.find('span', attrs={'class': 'credit'}).find_all('a')
+                for i, a in enumerate(actors_temp):
+                    if i != 0:
+                        actors.append(actors_temp[i].contents[0])
+            except:
+                actors = 'n.a.'
 
             # Parse genres
-            genres = list()
-            genres_temp = title_container.find('span', attrs={'class': 'genre'}).find_all('a')
-            for i, a in enumerate(genres_temp):
-                genres.append(genres_temp[i].contents[0])
+            try:
+                genres = list()
+                genres_temp = title_container.find('span', attrs={'class': 'genre'}).find_all('a')
+                for i, a in enumerate(genres_temp):
+                    genres.append(genres_temp[i].contents[0])
+            except:
+                genres = 'n.a.'
 
             # Store the movie data in a dictionary
             movie = {
@@ -133,9 +156,9 @@ def process_page(url):
                 logger.info('Movie with id ' + id + ' stored in "movies.json".')
             else:
                 logger.info('Movie with id ' + id + ' hold in RAM. It will be stored later in "movies.json"')
-        except:
-            logger.error('Unexpected error occurred: '.format(sys.exc_info()[0]))
-            continue
+    except:
+        logger.error('Unexpected error occurred: '.format(sys.exc_info()[0]))
+        gen_json(movies)
 
 # Removes the wrapping dictionary of the data in the json file
 def clean_json():
