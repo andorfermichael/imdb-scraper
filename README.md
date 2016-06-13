@@ -1,6 +1,6 @@
 # IMDb Scrapper
 
-```IMDb Scrapper``` stores a given number of movies from the Internet Movie Database as JSON.
+```IMDb Scrapper``` stores movies from the Internet Movie Database as JSON.
 
 ## Requirements
 
