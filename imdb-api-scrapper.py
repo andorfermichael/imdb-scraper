@@ -18,6 +18,9 @@ def do_query(id):
         directors = list()
         genres = list()
 
+        # Calculate the next movie id
+        following_id = id + 1
+
         if imdb.title_exists('tt' + '%07d' % id) == False:
             following_id = id + 1
             logger.info('Movie with id tt' + '%07d' % id + ' does not exists. Continue with tt' + '%07d' % following_id)
@@ -40,11 +43,13 @@ def do_query(id):
             for genre in movie.genres:
                     genres.append(genre)
         except TypeError:
-            following_id = id + 1
-            logger.info('Movie with id tt' + '%07d' % id + ' has inconsistent data. Continue with tt' + '%07d' % following_id)
+            logger.info('Movie with id tt' + '%07d' % id + ' has inconsistent data. Skip and continue with tt' + '%07d' % following_id)
+            return False
+        except AttributeError:
+            logger.info('Movie with id tt' + '%07d' % id + ' is an episode. Skip and continue with tt' + '%07d' % following_id)
             return False
         except:
-            logger.info('An error occured while processing movie with id tt' + '%07d' % id + '. Continue with tt' + '%07d' % following_id)
+            logger.info('An error occured while processing movie with id tt' + '%07d' % id + '. Skip and continue with tt' + '%07d' % following_id)
             return False
 
         # Store the movie data in a dictionary
@@ -90,12 +95,14 @@ if __name__ == '__main__':
     sys.setdefaultencoding('utf-8')
 
     # Define commandline arguments
-    parser = argparse.ArgumentParser(description='retrieve films from IMDB', usage='python imdb-scrapper.py 10000 save')
+    parser = argparse.ArgumentParser(description='retrieve films from IMDB', usage='python imdb-api-scrapper.py 10000 save')
     parser.add_argument('number', type=int, help='number of movies to request')
     parser.add_argument('storing', choices=['save', 'unsave'],
                         help='[save] store movies data after each request,[unsave] store movies data after all requests were executed')
     parser.add_argument('--start', type=int, help='the movie id to start with')
     parser.add_argument('--overwrite', default='yes', choices=['yes', 'no'], help='[yes] overwrite json file, [no] append json file')
+    parser.add_argument('--episodes', default='no', choices=['yes', 'no'],
+                        help='[yes] retrieve movies and episodes, [no] retrieve movies only')
     args = parser.parse_args()
 
     argcomplete.autocomplete(parser)
@@ -115,8 +122,13 @@ if __name__ == '__main__':
 
     MAX_ITERATIONS = args.number
 
+    if args.episodes == 'yes':
+        exclude_episodes = False
+    else:
+        exclude_episodes = True
+
     # Proxy the requests
-    imdb = Imdb(anonymize=True)
+    imdb = Imdb(anonymize=True, exclude_episodes=exclude_episodes)
 
     if args.overwrite == 'yes':
         # Create a clean json file
