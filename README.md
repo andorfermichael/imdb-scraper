@@ -1,6 +1,6 @@
 # IMDb Scrapper
 
-```IMDb Scrapper``` stores movies from the Internet Movie Database as JSON.
+Scrape movie information on IMDb.
 
 ## Requirements
 
@@ -43,3 +43,7 @@ Collect and store the first 80,000 most voted feature movies from 1950 to the cu
 ```python
 python imdb-page-scrapper.py 80000 save
 ```
+
+## Author
+
+[Michael Andorfer](mailto:mandorfer.mmt-b2014@fh-salzburg.ac.at)
